@@ -1,0 +1,548 @@
+#########################################
+## Statistics about general population ##
+#########################################
+
+Suppose that general population consist of 100,000 individuals.
+
+D1: Epilepsy 
+D2: Schizophrenia
+
+Assume that the prevalance of Epilepsy in the general population is 5.00%.
+So there are exactly 5000 individuals with Epilepsy in the general population.
+Prob(D1) = 0.05 = 5%
+
+Assume that the prevalnace of Schizophrenia in the population is 10.00%. 
+So there are exactly 10,000 individuals with Schizophrenia in the general 
+population.
+Prob(D2) = 0.10 = 10%
+
+Assume that Epilepsy and Schizophrenia are independent, so there are exactly
+500 individuals with both Epilepsy and Schizophrenia.
+Prob(D1 and D2) = 0.05 * 0.10 = 0.005 = 0.5%
+
+Prob(D1notD2) = 0.05 * (1.0 - 0.10) = 0.045.
+Prob(D2notD1) = 0.10 * (1.0 - 0.05) = 0.095.
+Prob(noD1noD2) = (1.0 - 0.05) * (1.0 - 0.10) = 0.855
+
+Prevalence of noD1 and noD2 individuals in the general population is 
+85,500 / 100,000 = 85.5 %
+
+2 X 2 Chi-square test on general population:
+
+                               Have D2
+                         No              Yes            Total
+    Have D1   No       85,500          9,500           95,000
+              Yes       4,500            500            5,000
+              Total    90,000         10,000          100,000
+
+    Chi squared equals 0.000 with 1 degrees of freedom. 
+    The two-tailed P value equals 1.0000 
+
+##############################################################
+## Thought experiment #1: Identical visit rate for D1notD2, ##
+## D2notD1, and D1andD2                                     ##
+##############################################################
+
+a. Pr(V | D1notD2) = 0.10 or 10 %
+b. Pr(V | D2notD1) = 0.10 or 10 %
+c. Pr(V | D1andD2) = 0.10 or 10 %
+d. P(V) = Pr(V | All ) = 20 %
+
+--Statistics about individuals that visit Stanford Hospital--
+
+(0) Assume visit rate (for all disoders) to Stanford is 20.0%:
+
+    Let V denote Visit Stanford)
+
+      Pr(V) = Pr(V | All) =  0.20 or 20 %
+
+      Count(V) = Count(V | All) = 0.20 * Count(All) = 20,000
+
+                     Pr(V | All) * Pr(All)    
+      Pr(All | V) =  --------------------- =  Pr(All) = 1.00
+                           Pr(V)
+
+      Count(All | V) = Prob(All | V) * Count(V) = 1.00 * 20,000 = 20,000
+
+(1) Assume visit rate of D1notD2 patients is 10.0%:
+
+    Pr(V | D1notD2) = 0.10 or 10.0%
+
+                       Pr(V | D1notD2) * Pr(D1notD2)
+    Pr(D1notD2 | V) = -----------------------------
+                                   Pr(V)
+
+                      0.10 * 0.045
+    Pr(D1notD2 | V) = ------------ = 0.0225
+                          0.20
+
+    Count(D1notD2 | V) = Pr(D1notD2 | V) * Count(V)
+
+                       = 0.0225 * 20,000
+                       = 450
+
+    There are 450 D1notD2 individuals that visit Stanford Hospital.
+
+(2) Assume visit rate of D2notD1 patients is 10.0%:
+
+    Pr(V | D2notD1) = 0.10 or 10.0%
+
+                       Pr(V | D2notD1) * Pr(D2notD1)
+    Pr(D2notD1 | V) = -----------------------------
+                                   Pr(V)
+
+                      0.10 * 0.095
+    Pr(D1notD2 | V) = ------------ = 0.0475
+                          0.20
+
+    Count(D1notD2 | V) = Pr(D1notD2 | V) * Count(V)
+
+                       = 0.0475 * 20,000
+                       = 950
+
+    There are 950 D2notD2 individuals that visit Stanford Hospital.
+
+(3) Assume visit rate of D1andD2 patients is 10.0%:
+
+    Pr(V | D2andD1) = 0.10 or 10.0%
+
+                       Pr(V | D2andD1) * Pr(D2andD1)
+    Pr(V | D2andD1) =  -----------------------------
+                                   Pr(V)
+
+                      0.10 * 0.005
+    Pr(D1notD2 | V) = ------------ = 0.0025
+                          0.20
+
+    Count(D1andD2 | V) = Pr(D1andD2 | V) * Count(V)
+
+                       = 0.0025 * 20,000
+                       = 50
+
+    There are 50 D1andD2 individuals that visit Stanford Hospital.
+
+(4) noD1noD2 patients:
+
+    Count(noD1noD2 | V) = Count(V) - Count(D1noD2) - 
+                          Count(D2noD1) - Count(noD1no2)
+
+                        = 20,000 - 950 - 450 - 50 
+                        = 18550
+
+    Pr(noD21oD2 | V) = Count(noD1noD2 | V) / Count(V)
+                       = 18550 / 20,000
+                       = 0.9275 or 92.75%
+
+                       Pr(noD1noD2 | V) * Pr(Visit)
+    Pr(V | noD1noD2) = ----------------------------
+                               Pr(noD1noD2)
+
+                       0.9275 * 0.20
+    Pr(V | noD1noD2) = ------------- = 0.217 or 21.7 %
+                           0.855
+
+(5) Chi-square test on RAW EMR data
+
+                                     Have D2
+                          No              Yes            Total
+    Have D1   No        18,550            950           19,500
+              Yes          450             50              500
+              Total     19,000           1000           20,000
+
+    Chi squared equals 25.922 with 1 degrees of freedom.
+    The two-tailed P value is less than 0.0001 
+
+##########################################################
+## Adjust EMR counts using extension of Rzhetsky Method ##
+##########################################################
+
+Let Ad_count denote the adjusted counts.
+
+                   EMR Prevalence of D1notD2
+Let alphaD1notD2 = -------------------------
+                   Pop Prevalence of D1notD2
+
+                   Count(D1notD2 | V)     Count(All)
+    alphaD1notD2 = ------------------ * --------------
+                     Count(All |V)      Count(D1notD2)
+
+                  Pr(D1notD2 | V)
+    alphaD1notD2 =---------------
+                  Pr(D1notD2)  
+
+                   P(V | D1notD2)   0.10
+    alphaD1notD2 = -------------- = ----
+                       P(V)         0.20
+
+    alphaD1notD2 = 0.5
+
+Similarly:
+
+    alphaD2notD1 = 0.5
+    alphaD1andD2 = 0.5
+
+# note f = 1 - alpha (f as defined in Rzhetsky Method)
+
+                          1
+Ad_count(D1notD2) = ------------ * Count(D1notD2) = 2.0 * 450 = 900
+                    alphaD1notD2
+
+                          1
+Ad_count(D2notD1) = ------------ * Count(D2notD1) = 2.0 * 950 = 1900
+                    alphaD2notD1
+
+                          1
+Ad_count(D1andD2) = ------------ * Count(D1andD2) = 2.0 * 50 = 100
+                    alphaD1andD2
+
+Ad_count(noD1noD2) = Count(All) - Ad_count(D1notD2)
+                                - Ad_count(D2noeD1)
+                                - Ad_count(D1andD2)
+
+                   = 17,100
+
+Chi-square test on Adjusted EMR data:
+
+                                     Have D2
+                          No              Yes            Total
+    Have D1   No        17,100           1900           19,000
+              Yes          900            100            1,000
+              Total     18,000           2000           20,000
+
+Chi squared equals 0.000 with 1 degrees of freedom.
+The two-tailed P value equals 1.0000 
+
+
+#################################################################
+## Thought experiment #2: Same visit rate for D1notD2, D2notD1 ##
+## and determine D1andD2 visit rate as in Berkson et. al. 1946 ##
+#################################################################
+
+a. Pr(V | D1notD2) = 0.10 or 10 %
+b. Pr(V | D2notD1) = 0.10 or 10 %
+c. Pr(V | D1andD2) = 1.0 - [1 - Pr(V | D1notD2)] * [1 - Pr(V | D2notD1)]
+                   = 0.19 or 19 %
+d. P(V) = Pr(V | All ) = 20 %
+
+--Statistics about individuals that visit Stanford Hospital--
+
+(0), (1) and (2) same as thought experiment #1.
+
+    There are 1425 D2notD2 individuals that visit Stanford Hospital.
+
+(3) D1andD2 patients: 
+
+    Pr(V | D1andD2) = 1.0 - [1 - Pr(V | D2notD1)] * [1 - Pr(V | D2notD2)]
+                    = 1.0 - (0.9 * 0.9) = 0.19 or 19 %
+
+                       Pr(V | D2andD1) * Pr(D2andD1)
+    Pr(D1notD2 | V) =  -----------------------------
+                                   Pr(V)
+
+                      0.19 * 0.005
+    Pr(D1notD2 | V) = ------------ = 0.00475
+                          0.20
+
+    Count(D1andD2 | V) = Pr(D1andD2 | V) * Count(V)
+
+                       = 0.00475 * 20,000
+                       = 95
+
+    There are 95 D1andD2 individuals that visit Stanford Hospital.
+
+
+(4) noD1noD2 patients:
+
+    Count(noD1noD2 | V) = Count(V) - Count(D1noD2) - 
+                          Count(D2noD1) - Count(noD1no2)
+
+                        = 20,000 - 450 - 950 - 95 
+                        = 18505
+
+    Pr(noD21oD2 | V) = Count(noD1noD2 | V) / Count(V)
+                       = 18505 / 20,000
+                       = 0.9225 or 92.25%
+
+                       Pr(noD1noD2 | V) * Pr(Visit)
+    Pr(V | noD1noD2) = ----------------------------
+                               Pr(noD1noD2)
+
+                       0.9225 * 0.20
+    Pr(V | noD1noD2) = ------------- = 0.216 or 21.6 %
+                           0.855
+
+(5) Chi-square test on RAW EMR data
+
+                                     Have D2
+                          No              Yes            Total
+    Have D1   No        18,505            950           19,455
+              Yes          450             95              545
+              Total     18,955           1045           20,000
+
+    Chi squared equals 166.044 with 1 degrees of freedom.
+    The two-tailed P value is less than 0.0001 
+
+##########################################################
+## Adjust EMR counts using extension of Rzhetsky Method ##
+##########################################################
+
+Let Ad_count denote the adjusted counts.
+
+
+                   P(V | D1notD2)   0.10   
+    alphaD1notD2 = -------------- = ---- = 0.5
+                       P(V)         0.20
+
+                   P(V | D1notD2)   0.10
+    alphaD2notD2 = -------------- = ---- = 0.5
+                       P(V)         0.20
+
+                   P(V | D1notD2)   0.19
+    alphaD2andD2 = -------------- = ---- = 0.95
+                       P(V)         0.20
+
+
+# note f = 1 - alpha (f as defined in Rzhetsky Method)
+
+                          1                         1.00
+Ad_count(D1notD2) = ------------ * Count(D1notD2) = ---- * 450 = 900
+                    alphaD1notD2                    0.50
+
+                          1                         1.00
+Ad_count(D2notD1) = ------------ * Count(D2notD1) = ---- * 950 = 1900
+                    alphaD2notD1                    0.50
+
+                          1                         1.00
+Ad_count(D1andD2) = ------------ * Count(D1andD2) = ---- * 95 = 100
+                    alphaD1andD2                    0.95
+
+                                    1
+Ad_count(noD1noD2) = Count(All) - ----- * (Count(D1notD2) + Count(D2notD1) + 
+                                  alpha    Count(D1andD2))
+
+                   = 17,100
+
+Chi-square test on Adjusted EMR data:
+
+                                     Have D2
+                          No              Yes            Total
+    Have D1   No        17,100           1900           19,000
+              Yes          900            100            1,000
+              Total     18,000           2000           20,000
+
+Chi squared equals 0.000 with 1 degrees of freedom.
+The two-tailed P value equals 1.0000 
+
+
+######################################################################
+## Thought experiment #2: Different visit rate for D1notD2, D2notD1 ##
+## and determine D1andD2 visit rate as in Berkson et. al. 1946      ##
+######################################################################
+
+a. Pr(V | D1notD2) = 0.10 or 10 %
+b. Pr(V | D2notD1) = 0.30 or 30 %
+c. Pr(V | D1andD2) = 1.0 - [1 - Pr(V | D2notD1)] * [1 - Pr(V | D1notD2)]
+                   = 0.37 or 37%
+d. P(V) = Pr(V | All ) = 20 %
+
+(0), (1) same as thought experiment #1.
+
+(2) Assume visit rate of D2notD1 patients is 30.0 %:
+
+    Pr(V | D2notD1) = 0.30 or 30.0%
+
+                       Pr(V | D2notD1) * Pr(D2notD1)
+    Pr(D2notD1 | V) = -----------------------------
+                                   Pr(V)
+
+                      0.30 * 0.095
+    Pr(D1notD2 | V) = ------------ = 0.1425
+                          0.20
+
+    Count(D1notD2 | V) = Pr(D1notD2 | V) * Count(V)
+
+                       = 0.1425 * 20,000
+                       = 2850
+
+(3) D1andD2 patients: 
+
+    Pr(V | D1andD2) = 1.0 - [1 - Pr(V | D2notD1)] * [1 - Pr(V | D2notD2)]
+                    = 1.0 - (0.7 * 0.9) = 0.37 or 37%
+
+                       Pr(V | D2andD1) * Pr(D2andD1)
+    Pr(D1notD2 | V) =  -----------------------------
+                                   Pr(V)
+
+                      0.37 * 0.005
+    Pr(D1notD2 | V) = ------------ = 0.00925
+                          0.20
+
+    Count(D1andD2 | V) = Pr(D1andD2 | V) * Count(V)
+
+                       = 0.00925 * 20,000
+                       = 185
+
+    There are 185 D1andD2 individuals that visit Stanford Hospital.
+
+
+(4) noD1noD2 patients:
+
+    Count(noD1noD2 | V) = Count(V) - Count(D1noD2) - 
+                          Count(D2noD1) - Count(noD1no2)
+
+                        = 20,000 - 450 - 2850 - 185
+                        = 16515
+
+    Pr(noD21oD2 | V) = Count(noD1noD2 | V) / Count(V)
+                       = 16515 / 20,000
+                       = 0.82575 or 82.575 %
+
+                       Pr(noD1noD2 | V) * Pr(Visit)
+    Pr(V | noD1noD2) = ----------------------------
+                               Pr(noD1noD2)
+
+                       0.82575 * 0.20
+    Pr(V | noD1noD2) = -------------- = 0.19316 or 19.316 %
+                           0.855
+
+(5) Chi-square test on RAW EMR data
+
+                                     Have D2
+                          No              Yes            Total
+    Have D1   No        16,515           2850           19,365
+              Yes          450            185              635
+              Total     16,965           3035           20,000
+
+    Chi squared equals 98.157 with 1 degrees of freedom.
+    The two-tailed P value is less than 0.0001 
+
+
+##########################################################
+## Adjust EMR counts using extension of Rzhetsky Method ##
+##########################################################
+
+Let Ad_count denote the adjusted counts.
+
+
+                   P(V | D1notD2)   0.10
+    alphaD1notD2 = -------------- = ---- = 0.50
+                       P(V)         0.20
+
+                   P(V | D1notD2)   0.30
+    alphaD2notD2 = -------------- = ---- = 1.50
+                       P(V)         0.20
+
+                   P(V | D1notD2)   0.37
+    alphaD2andD2 = -------------- = ---- = 1.85
+                       P(V)         0.20
+
+
+# note f = 1 - alpha (f as defined in Rzhetsky Method)
+
+                          1
+Ad_count(D1notD2) = ------------ * Count(D1notD2) = 2.0 * 450 = 900
+                    alphaD1notD2
+
+                          1                         1.00
+Ad_count(D2notD1) = ------------ * Count(D2notD1) = ---- * 2850 = 1900
+                    alphaD2notD1                    1.50
+
+                          1                         1.00
+Ad_count(D1andD2) = ------------ * Count(D1andD2) = ---- * 185 = 100
+                    alphaD1andD2                    1.85
+
+                                    1
+Ad_count(noD1noD2) = Count(All) - ----- * (Count(D1notD2) + Count(D2notD1) + 
+                                  alpha    Count(D1andD2))
+
+                   = 17,100
+
+Chi-square test on Adjusted EMR data:
+
+                                     Have D2
+                          No              Yes            Total
+    Have D1   No        17,100           1900           19,000
+              Yes          900            100            1,000
+              Total     18,000           2000           20,000
+
+Chi squared equals 0.000 with 1 degrees of freedom.
+The two-tailed P value equals 1.0000 
+
+##########################################################
+##           Upper bound on Pr(V | D1andD2)             ##
+##########################################################
+
+I think that:
+
+Pr(V | D1andD2) = 1.0 - [1 - Pr(V | D1notD2)] * [1 - Pr(V | D2notD1)]
+
+actually serve as an upper bound estimate.
+
+Reasons:
+
+1. Formula give rate that patients with D1andD2 visit Stanford Hospital.
+   However, patient would probably come in to treat 1 primary disoder and the
+   the 2nd disease might not undetected and therefore its ICD-9 code will
+   not appear in the EMR dataset.
+
+2. ###IGNORE THIS CASE..
+   Pr(V | D1notD2) is probability of person visiting a particular hospital
+   to treat D1.
+
+   Pr(V | D2notD1) is probability of person visiting a particular hospital
+   to treat D2.
+
+   We want Pr(V | D1andD2), probability that person visting a particular
+   hospital to treat D1 or D2.
+
+   Formula assume that patient will visiting the same hospital to treat D1 
+   and D2.
+
+   Concretely, again suppose there are 10 hospital in the Stanford
+   Area of which Stanford Hospital is one of them. Also assume (for sake
+   of simplicity) that if a person have a disease Di, he/she will
+   choose to visit one of the 10 hospital with equal probability.
+
+   So Pr(Vi | onlyDi) = 1/10 for each of hospital and each disease Di.
+
+   Now lets rename the variable "Visit Stanford Hospital" from V to Vs.
+
+   Pr(Vs | D1notD2) = 1/10
+   Pr(Vs | D2no
+
+3. My intuition (still have to validate this) is that cooperation model p_value
+   will increase monotonically with Pr(V | D1andD2). Reason is that as 
+   P(V | D1andD2) increases, the normalized D1andD2 EMR "count" decreases and
+   as normalized D1andD2 EMR "count" decreases, there is less evidence to
+   support comorbidity of D1 and D2.
+
+
+   This means that if have an strict upper bound* on Pr(V | D1andD2), we can
+   compute a strict upper bound on the cooperation model's p_value. If this
+   p_value is significant (<0.05 + Bonferroni correction), then we can be
+   confident in the result.
+
+   Similarly (also still have to validate this), my intution suggest that
+   competitive model p_value will decease monotonically with Pr(V | D1andD2).
+   So in this case if we have a strict lower boundon Pr(V | D1andD2), we can
+   compute a strict upper bound on the competitive model's p_value. If this
+   p_value is significant (<0.05 + Bonferroni correction), then we can be
+   confident in the result.
+
+   A possible strict lower bound on Pr(V | D1andD2) is:
+       min( Pr(Vs | D1notD2), Pr(Vs | D2notD1).
+
+   *No bound is absulate strict. There will be cases where having both D1
+   and D2 makes it significantly more or less likely for the person to visit
+   the hospital. So, we are still making an assumption here that having D1
+   doesn't influence the probability that a person will visit a Stanford for
+   D2 treatment and vice versa.
+
+##########################################################
+##  Problem with optimization numerical stability       ##
+##########################################################
+
+1. When disease have very different age-of-onset curve (no overlap):
+   Alzheimer's disease and Autism
+
+2. In cases where optimal (maximum likelihood) rho12 =~ 0.0

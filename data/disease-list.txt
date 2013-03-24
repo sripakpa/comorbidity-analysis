@@ -1,0 +1,171 @@
+# List of diseases
+# Derived SI-Appendix 3 of Rzhetsky et. al. 2007.
+# This file should contain 161 diseases (no duplicates).
+#
+# I removed comma from the disease names, so that file can be conveniently
+# parsed:
+# (1) "Breast cancer, female" becomes "Breast cancer (female)"
+# (2) "Breast cancer, male" becomes "Breast cancer (male)"
+# (3) "Cardiomyopathy, primary" becomes "Cardiomyopathy (primary)"
+
+Amino acid (AA) metabolism (aromatic) disorders
+Amino acid (AA) metabolism (branched) disorders
+Amino acid (AA) metabolism (Lowe) disorders
+Amino acid (AA) metabolism (sulfur-bearing) disorders
+Amino acid (AA) metabolism (straight-chain) disorders
+Amino acid (AA) transport disorders
+Acanthosis nigricans
+Acidosis
+Aciduria
+Actinomycosis
+Acute leukemia
+Acute promyelocytic leukemia
+Ainhum
+Albright-Sternberg syndrome
+Alcoholism
+Allergic rhinitis
+Alkalosis
+Alopecia
+Alopecia areata
+Alzheimer's disease
+Amebiasis
+Amyotrophic lateral sclerosis
+Anaerobes
+Aniridia
+Ankylosing spondylitis
+Anthrax
+Aortic aneurysm
+Aplastic anemia
+Attention deficit
+Autism
+Behcet's syndrome
+Benign neoplasms
+Bipolar disorder
+Breast cancer (female)
+Breast cancer (male)
+Brucellosis
+Budd-Chiari
+Bundle branch block
+Buphthalmos
+Burkitt's lymphoma
+Carcinoma in situ
+Carbohydrate transport and metabolism
+Cardiomyopathy (primary)
+Celiac sprue
+Cerebral palsy
+Cervical rib
+Charcot-Marie-Tooth
+Cholelithiasis
+Cholera
+Chondrodystrophy
+Congenital absence of vertebra
+Congenital spinal fusion
+Cystic fibrosis
+Dejerine-Sottas disease
+Depression
+Dermatomyositis-polymyositis
+Diabetes mellitus type 1
+Diabetes mellitus type 2
+Diphtheria
+E. coli intestinal
+Edward's
+Enzyme-deficiency (hemolytic anemia)
+Epilepsy
+Erythematosquamous dermatosis
+Food poisoning
+Friedreich's ataxia
+Fragile X syndrome
+Giant cell arteritis
+Gram-negative bacteria (infection)
+Goiter
+Goodpasture's syndrome
+Gout
+HIV
+Helicobacter pilori infection
+Hemivertebra
+Hepatitis A
+Hepatitis B
+Hepatitis C
+Hepatitis D
+Hepatitis E
+Hereditary spastic paraplegia
+Hodgkin's disease
+Hyperosmolality
+Hypoosmolality
+Hypersensitivity angiitis
+Hypertrophic obstructive cardiomyopathy
+Hypoglycemia
+Ichthyosis congenita
+Kawasaki's disease
+Keratoderma
+Klippel-Feil syndrome
+Leprosy
+Lethal midline granuloma
+Leukodystrophy
+Lipid metabolism disorders
+Lown-Ganong-Levine syndrome
+Lumbosacral spondylolysis
+Lymphosarcoma
+Meningococcus
+Migraine
+Mineral metabolism disorders (Fe)
+Mineral metabolism disorders (Cu)
+Mineral metabolism disorders (Mg)
+Mineral metabolism disorders (Ca)
+Mitochondrial disorders
+Moyamoya
+Multiple epiphyseal dysplasia
+Multiple sclerosis
+Mumps
+Muscular distrophy
+Mycoplasma
+Myotonic disorders
+Neuromyelitis optica
+Neurofibromatosis
+Ornithosis
+Osteogenesis imperfecta
+Osteopetrosis
+Parkinson's disease
+Patau's syndrome
+Pertussis
+Pervasive developmental disorders
+Phenylketonuria
+Pick's disease
+Plague
+Plasma cell leukemia
+Pneumonia
+Poliomyelitis
+Polyarteritis nodosa
+Polyostotic fibrous dysplasia of bone
+Prader-Willi's syndrome
+Primary cerebellar degeneration
+Prion-related disorders
+Progeria
+Psoriasis
+Reiter's syndrome
+Renal glycosuria
+Reticulosarcoma
+Rheumatoid arthritis
+Systemic lupus erythematosus
+Salmonella
+Schilder's syndrome
+Schizophrenia
+Scleroderma
+Shigella
+Sjogren's syndrome
+Spina bifida occulta
+Spondylolisthesis
+Staphilococcus
+Streptococcus
+Takayasu's arteritis
+Thrombotic thrombocytopenic purpura
+Tuberculosis
+Tuberous sclerosis
+Tularemia
+Typhoid
+Urea cycle metabolism disorders
+Virus
+Viral infections of the central nervous system (CNS)
+Vitamin deficiency
+WPW
+Wegener's granulomatosis

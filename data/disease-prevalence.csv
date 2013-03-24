@@ -1,0 +1,57 @@
+# Percentage prevalance of diseases in the United States general population 
+# in CSV format
+# 1st column is prevalance value in percentage (so 1.72 is 1.72 %)
+# 2nd column is disease name
+# Use 314 million as the United States 2012 population 
+# Use 311 million as the United States 2011 population 
+# Use 281 million as the United States 2000 population 
+# Figure out how to convert from incidence rate and prevalence rate.
+# Is prevalence the correct normalization measure? 
+# If disease is lethal (patient die), then how does this effect prevalance rate?
+
+Alzheimer's disease, 1.72
+# from http://www.alz.org/downloads/facts_figures_2012.pdf.
+# 5.4 million Americans of all age have Alzheimer's disease in 2012
+
+# Alzheimer's disease, 1.60
+# from http://alzheimer.ucdavis.edu/outreach/wnews/pdf/1119.pdf.
+# 4.5 million Americans with AD in the US population in 2000
+# Estimated using 3 adjacent neighorhoods in Chicago, Ill.
+
+Attention deficit, 1.61
+# from http://www.cdc.gov/nchs/data/series/sr_10/sr10_254.pdf
+# In 2011, 8.5 +- 0.35 % of US children aged 3-17 years 
+# reported ever having been told of having ADHD.
+# This translate to 5 million childrens in the US population.
+
+# Attention deficit, 4.40
+# from http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2859678/
+# 2006 study estimated prevalence of US adult aged 18-44
+# years with ADHD to be 4.4%. However this study also 
+# estimated that only about 10 % of these group have
+# received formal diagnosis.
+
+Autism, 1.13
+# from http://www.cdc.gov/ncbddd/autism/data.html
+# About 1 in 88 children has been identified with an
+# Autism spectrum disorder by age 8 (2008 survey)
+# Autism vs. Austism spectrum disorder? 
+# Autism diagnosis different in CA or elsewhere.
+
+Breast cancer (female), 6.25
+# from http://www.breastcancer.org/symptoms/understand_bc/statistics
+# About 1 in 8 U.S. will develop invasive breast cancer
+# over the course of her lifetime. This translate to
+# About 1 in 16 individuals.
+
+Epilepsy, 3.85
+# http://www.cdc.gov/epilepsy/basics/fast_facts.htm
+# 1 in 26 people will be diagnosed will epilepsy at some point
+# in their lives
+
+Schizophrenia, 1.10
+# http://http://www.nimh.nih.gov/health/publications/
+# the-numbers-count-mental-disorders-in-america/index.shtml
+# Approximately 2.4 million American adults, or about 1.1 
+# percent of the population age 18 and older in a giver year
+# have schizophrenia.

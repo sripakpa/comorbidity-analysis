@@ -1,0 +1,73 @@
+#PATIENT_ENTITY_DEID,CURRENT_AGE_IN_YRS,Gender,Race,CODE,AGE_AT_FIRST_APPEARANCE_YRS,Comments
+A0,20,M,WHITE,299.00,5,This is a mock EMR data
+A1,10,F,WHITE,299.00,10,"A type patients only have Autism 299.00, 299.01"
+A2,15,M,WHITE,299.00,15,
+A3,20,F,WHITE,299.00,20,Assumptions:
+A4,40,M,WHITE,299.00,25,1. Patient gender or Ethnicity cannot change between visits
+A5,50,F,WHITE,299.00,30,2. Visit-Age is the age of Patient at the hospital visit that let to the ICD-9 record
+A6,35,M,ASIAN,299.00,35,"3. For each patient, allow for possibility of multiple ICD-9s for for each disease"
+A7,40,F,ASIAN,299.00,40,"4. For each patient, same ICD-9 may appear in multiple visits (at different visit-age)"
+A8,45,M,ASIAN,299.00,45,
+A9,50,F,ASIAN,299.00,50,
+A10,60,M,WHITE,299.01,55,
+A11,60,F,WHITE,299.01,60,
+A12,65,M,WHITE,299.01,65,
+A13,70,F,WHITE,299.01,70,
+A14,75,M,WHITE,299.01,75,
+A15,90,F,WHITE,299.01,80,
+A16,85,M,WHITE,299.01,85,
+A17,90,F,WHITE,299.01,90,
+A18,95,M,WHITE,299.01,95,
+A19,95,F,WHITE,299.01,95,
+A20,100,M,WHITE,299.01,95,
+A0,20,M,WHITE,299.00,20,Patient visit for same disease at a later date with same ICD-9 recorded 
+A5,50,F,WHITE,299.00,50,
+A10,60,M,WHITE,299.01,60,
+A15,90,F,WHITE,299.00,90,Patient visit for same disease at a later later with a different ICD-9 recorded
+A20,100,M,WHITE,299.01,100,
+B0,5,M,NATIVE AMERICAN,345.11,5,"B type patients only have Epilepsy 345.[00, 01, 10, 11, 2, 3, 40, 41, 50, 51, 60, 61, 70, 71, 80, 90, 91]"
+B1,10,F,PACIFIC ISLANDER,345.11,10,
+B2,15,M,OTHER,345.11,15,
+B3,20,F,UNKNOWN,345.11,20,
+B4,25,M,BLACK,345.11,25,
+B5,30,F,WHITE,345.11,30
+B6,35,M,WHITE,345.11,35
+B7,40,F,WHITE,345.11,40
+B8,45,M,WHITE,345.11,45
+B9,50,F,WHITE,345.11,50
+B10,55,M,WHITE,345.11,55
+B11,60,F,WHITE,345.11,60
+B12,65,M,WHITE,345.11,65
+B13,70,F,WHITE,345.11,70
+B14,75,M,WHITE,345.11,75
+B15,80,F,WHITE,345.11,80
+B16,85,M,WHITE,345.11,85
+B17,90,F,WHITE,345.11,90
+B18,95,M,WHITE,345.11,95
+B19,100,F,WHITE,345.11,100
+B20,105,M,WHITE,345.11,105
+C0,50,M,WHITE,299.00,5,C type patients have both Autism and Azheimer's disease
+C1,50,F,WHITE,299.00,20,
+C2,50,M,WHITE,299.00,40,Allow possibility of same visit-age for both dieseases
+C3,60,F,WHITE,299.00,60,
+C4,80,M,WHITE,299.00,80,
+C5,100,F,WHITE,299.00,100,
+C0,50,M,WHITE,345.11,35,
+C1,50,F,WHITE,345.11,40,Allow possibility of same visit-age for both dieseases
+C2,50,M,WHITE,345.11,45,
+C3,60,F,WHITE,345.11,50,
+C4,80,M,WHITE,345.11,55,
+C5,100,F,WHITE,345.11,60,
+D0,20,F,WHITE,174.1,20,"D type patients only have Breast cancer, female 174.0, 174.1, ...,174.9"
+D1,25,F,WHITE,174.2,25,
+D2,30,F,WHITE,174.3,30,
+D3,35,F,WHITE,174.4,35,
+D4,40,F,WHITE,174.5,40,
+D5,45,F,WHITE,174.6,45,
+D6,50,F,WHITE,174.8,50,
+D7,55,F,WHITE,174.9,55,
+D8,60,F,WHITE,174.1,60,
+D9,65,F,WHITE,174.2,65,
+D10,70,F,WHITE,174.3,70,
+S0,50,UNKNOWN,WHITE,345.11,50,"Special case, missing gender. This data entry will be ignored."
+S1,55,M,WHITE,BLAH,55,"Special case, ICD-9 doesn't belong to the 161 disorders. This data entry will be ignored."
