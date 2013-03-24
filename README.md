@@ -1,4 +1,4 @@
 comorbidity-analysis
 ====================
 
-Discover disease overlaps and correlations using electronic medical records (EMRs)
+Data mining of electronic medical records (EMRs) to discover diseases overlaps and correlations
