@@ -252,13 +252,6 @@ class GeneticPenetrance(object):
                                                        rho2_mock,
                                                        rho12_mock)
 
-        if rho1 < 0.0 or rho2 < 0.0 or rho12 < 0.0:
-            small_val = 1e-5
-            phi_infty_probs = np.ones(4) * small_val
-            phi_infty_probs *= ( 1.0 / (1.0 + math.exp(-1.0 * (rho1 + 0))))
-            phi_infty_probs *= ( 1.0 / (1.0 + math.exp(-1.0 * (rho2 + 0))))
-            phi_infty_probs *= ( 1.0 / (1.0 + math.exp(-1.0 * (rho12 + 0))))
-
         return phi_infty_probs
 
     def __probs_sharp_threshold(self, rho1, rho2, rho12):

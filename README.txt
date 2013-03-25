@@ -1,9 +1,11 @@
 INTRODUCTION:
 
     The python package contains scripts for data mining of the Electronic
-    Medical Records (EMR) to predict diseases comorbidities and correlations. 
-    The method used here reproduces and extends the techniques proposed in
-    Rzhetsky et. al. 2007 [1]. 
+    Medical Records (EMR) to predict predict diseases comorbidities and
+    correlations.
+    
+    The models used here is an extension of the probabilistic model proposed
+    in Rzhetsky et. al. 2007 [1].
 
     This package is currently being used to mine EMR data obtained from
     Stanford Hospital through the Stanford Translational Research Integrated
@@ -33,8 +35,8 @@ DATA:
     (1) data/test_EMR_dataset.csv
 
         The actual STRIDE EMR dataset is not included in this repository due
-        to the senstive nature of the data. Instead we include test EMR dataset
-        consisting of 50,000 "mock" patients  records for 6 diseases. 
+        to the sensitive nature of the data. Instead we include a test EMR
+        dataset consisting of 50,000 "mock" patients records for 6 diseases.
 
     (2) data/disease-list.txt
 
@@ -55,10 +57,14 @@ DESCRIPTIONS:
 
     (1) p_value.py
 
-        Synopsis:
+        Computes the statistical significance (p-value) of observing the EMR
+        dataset for a pair of diseases according to the genetic penetrance
+        models proposed in Rzhetsky et al. 2007 [1].
 
         Usage: 
-
+            python p_value.py -i <emr_data_file> \
+                              --d1 <1st_disease_name> \
+                              --d2 <2nd_disease_name>
 
     Plotting/Data visualization
     ---------------------------
@@ -70,8 +76,8 @@ DESCRIPTIONS:
         derived from the EMR dataset.
 
         Usage: 
-          python plot_age_of_onset.py -i <emr_data_file> \
-                                      --disease <disease_name>
+              python plot_age_of_onset.py -i <emr_data_file> \
+                                          --disease <disease_name>
 
     (2) plot_joint_age_of_onset.py
 
@@ -85,8 +91,9 @@ DESCRIPTIONS:
 
     (3) plot_joint_final_age.py
 
-        Plots the joint patient's final-age distribution for a pair of diseases
-        using the data derived from the EMR dataset.
+        Plots the count of patients as a distribution of their final age value. 
+        The patients are seperated by their 2 disease phenotype status and the
+        count are computed seperately for each phenotype status.
 
         Usage:
             python plot_joint_final_age.py -i <emr_data_file> \
@@ -129,9 +136,9 @@ AUTHOR:
 
 COLLABORATORS:
 
-    Dr. Steve Bagley (Stanford)
+    Dr. Steven Bagley (Stanford University)
 
-    Prof. Russ Altman (Stanford)
+    Prof. Russ Altman (Stanford University)
 
 REFERENCES:
 

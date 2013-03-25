@@ -7,6 +7,7 @@ import copy
 
 import numpy as np
 
+
 def create_log_likelihood_func(genetic_penetrance,
                                joint_age_of_onset_funcs,
                                patient_counts,
@@ -23,12 +24,15 @@ def create_log_likelihood_func(genetic_penetrance,
         If log_rho=True, then input rhos are actually logarithm of the rhos
         and hence need to take exponent of them to get the actual rhos.
 
+        The log_likelihood func is not defined for negative rhos. Therefore,
+        advantagous to optimize in the log_rho space instead of the rho space,
+        since this ensure that the rhos themselves never become negative.
+
         sign should be 1.0 to maximize the function.
         sign should be -1.0 to maximize the function.
         """
 
         if log_rho:
-            # To avoid the sigularity at rho = 0.0
             rho1 = np.exp(rho1)
             rho2 = np.exp(rho2)
             rho12 = np.exp(rho12)
@@ -183,70 +187,24 @@ def __compute_log_likelihood(rho1, rho2, rho12,
     if genetic_penetrance.get_overlap_type() == "independent":
          rho12 = 0.0
 
-    '''
-    if rho12 < 0.0: rho12 = 0.0
-    min_rho = 0.0
-    if rho1 < min_rho or rho2 < min_rho or rho12 < min_rho:
-       # Help revents negative rho parameters from being accessed during
-       # optimization.
-      return __large_linear_term(rho1, rho2, rho12, min_rho)
-
-
-    max_rho1 = 9.0 * genetic_penetrance.get_tau1()
-    max_rho2 = 9.0 * genetic_penetrance.get_tau2()
-    max_rho12 =  max(max_rho1, max_rho2)
-
-    if rho1 > max_rho1 or rho2 > max_rho2 or rho12 > max_rho12:
-      # Help prevents negative rho parameters from being accessed during
-      # optimization.
-      return __large_neg_linear_term(rho1, rho2, rho2,
-                                      max_rho1, max_rho2, max_rho12)
-    '''
-
-
     # Compute likelihood using Eq. 51 in Appendix 2 of Rzhetsky et al. 2007.
     log_likelihood = 0.0
 
     phi_infinity_probs = genetic_penetrance.compute_probs(rho1, rho2, rho12)
 
-    # Normalize the probabilities
-    norm_factor = np.ones(4)
-
+    # Normalize the counts
     if prval_norm_func != None:
-        # phi_infinity_probs = prval_norm_func(phi_infinity_probs)
-
         # sum over the age axis.
         raw_count = np.sum(patient_counts, axis=1)
         norm_count = prval_norm_func(raw_count)
 
+        norm_factor = np.ones(4)
+
         for n in xrange(len(norm_count)):
             if raw_count[n] >= 1e-20:
-                norm_factor[n] = norm_count[n]/raw_count[n]
+                norm_factor[n] = norm_count[n] / raw_count[n]
             else:
                 norm_factor[n] = 0.0
-
-        """
-        print "raw_count:"
-        print "D0: %7.2f, " % raw_count[0],
-        print "D1: %7.2f, " % raw_count[1],
-        print "D2: %7.2f, " % raw_count[2],
-        print "D12: %7.2f, " % raw_count[3],
-        print "Total: %7.2f, " % np.sum(raw_count),
-        print "E[D12]: %7.2f" % (raw_count[1] *
-                                 raw_count[2] /
-                                 np.sum(raw_count))
-        print "norm_count:"
-        print "D0: %7.2f, " % norm_count[0],
-        print "D1: %7.2f, " % norm_count[1],
-        print "D2: %7.2f, " % norm_count[2],
-        print "D12: %7.2f, " % norm_count[3],
-        print "Total: %7.2f, " % np.sum(norm_count),
-        print "E[D12]: %7.2f" % (norm_count[1] *
-                                 norm_count[2] /
-                                 np.sum(norm_count))
-
-        print "norm_factor= ", norm_factor
-        """
 
     # TODO: Convert this computation into a matrix formulation to speed up
     # the computation.
@@ -269,7 +227,7 @@ def __compute_log_likelihood(rho1, rho2, rho12,
                 age_of_onset_func = joint_age_of_onset_funcs[phi_t_index,
                                                              phi_inf_index]
 
-                age_of_onset_prob = age_of_onset_func(age_val) + 0.0000001
+                age_of_onset_prob = age_of_onset_func(age_val) + 1e-10
 
                 patient_likelihood += (age_of_onset_prob * 
                                        phi_infinity_probs[phi_inf_index])
@@ -302,27 +260,6 @@ def __compute_deriv_log_likelihood(rho1, rho2, rho12,
     if genetic_penetrance.get_overlap_type() == "independent":
          rho12 = 0.0
 
-    '''
-    if rho12 < 0.0: rho12 = 0.0
-
-    min_rho = 0.0
-    if rho1 < min_rho or rho2 < min_rho or rho12 < min_rho:
-      # Help prevents negative rho parameters from being accessed during
-      # optimization.
-      return __large_linear_deriv(rho1, rho2, rho2, min_rho)
-
-
-    max_rho1 = 9.0 * genetic_penetrance.get_tau1()
-    max_rho2 = 9.0 * genetic_penetrance.get_tau2()
-    max_rho12 =  max(max_rho1, max_rho2)
-
-    if rho1 > max_rho1 or rho2 > max_rho2 or rho12 > max_rho12:
-      # Help prevents negative rho parameters from being accessed during
-      # optimization.
-      return __large_neg_linear_deriv(rho1, rho2, rho2,
-                                      max_rho1, max_rho2, max_rho12)
-    '''
-
     # 2D numpy array, shape = (4, 3)
     deriv_phi_infinity_probs = genetic_penetrance.compute_deriv_probs(rho1,
                                                                       rho2,
@@ -331,18 +268,19 @@ def __compute_deriv_log_likelihood(rho1, rho2, rho12,
     # 1D numpy array, size = 4
     phi_infinity_probs = genetic_penetrance.compute_probs(rho1, rho2, rho12)
 
-
-    # Normalize the probabilities and their derivatives.
+    # Normalize the counts
     if prval_norm_func != None:
+        # sum over the age axis.
+        raw_count = np.sum(patient_counts, axis=1)
+        norm_count = prval_norm_func(raw_count)
 
-        pre_norm_probs = copy.deepcopy(phi_infinity_probs)
+        norm_factor = np.ones(4)
 
-        phi_infinity_probs = prval_norm_func(phi_infinity_probs)
-
-        for i in xrange(deriv_phi_infinity_probs.shape[0]):
-            deriv_phi_infinity_probs[i] *= (phi_infinity_probs[i] /
-                                            pre_norm_probs[i])
-
+        for n in xrange(len(norm_count)):
+            if raw_count[n] >= 1e-20:
+                norm_factor[n] = norm_count[n] / raw_count[n]
+            else:
+                norm_factor[n] = 0.0
 
     # Derivative of log-likelihood wrt to rho1, rho2, and rho12
     deriv_log_likelihood = np.zeros(3, dtype=np.float)
@@ -356,6 +294,9 @@ def __compute_deriv_log_likelihood(rho1, rho2, rho12,
             # skip bin with no patients
             if patient_count < 1e-20: continue
 
+            if prval_norm_func != None:
+               patient_count *= norm_factor[phi_t_index]
+
             patient_likelihood = 0.0
             deriv_patient_likelihood = np.zeros(3, dtype=np.float)
 
@@ -364,7 +305,7 @@ def __compute_deriv_log_likelihood(rho1, rho2, rho12,
                 age_of_onset_func = joint_age_of_onset_funcs[phi_t_index,
                                                              phi_inf_index]
 
-                age_of_onset_prob = age_of_onset_func(age_val) + 0.0000001
+                age_of_onset_prob = age_of_onset_func(age_val) + 1e-10
 
                 patient_likelihood += (age_of_onset_prob *
                                        phi_infinity_probs[phi_inf_index])
@@ -378,60 +319,3 @@ def __compute_deriv_log_likelihood(rho1, rho2, rho12,
                                      deriv_patient_likelihood)
 
     return deriv_log_likelihood
-
-def __large_linear_term(rho1, rho2, rho12, min_rho):
-    """A large linear term for negative rho parameters."""
-
-    large_constant = float(1e10)
-
-    constant_term = -1.0 * large_constant
-
-    linear_term = 0.0
-    if rho1 < min_rho: linear_term += large_constant * rho1
-    if rho2 < min_rho: linear_term += large_constant * rho2
-    if rho12 < min_rho: linear_term += large_constant * rho12
-
-    return linear_term + constant_term
-
-def __large_linear_deriv(rho1, rho2, rho12, min_rho):
-    """A large linear deriv for negative rho parameters."""
-
-    large_constant = float(1e10)
-
-    linear_deriv = np.zeros(3, dtype=np.float)
-
-    if rho1 < min_rho: linear_deriv[0] = large_constant
-    if rho2 < min_rho: linear_deriv[1] = large_constant
-    if rho12 < min_rho: linear_deriv[2] = large_constant
-
-    return linear_deriv
-
-def __large_neg_linear_term(rho1, rho2, rho12, 
-                            max_rho1, max_rho2, max_rho12):
-    """A large negative linear term when rho exceed max_rho."""
-
-    large_constant = float(1e10)
-
-    constant_term = -1.0 * large_constant
-
-    linear_term = 0.0
-    if rho1 > max_rho1: linear_term += -large_constant * (rho1 - max_rho1)
-    if rho2 > max_rho2: linear_term += -large_constant * (rho2 - max_rho1)
-    if rho12 > max_rho12: linear_term += -large_constant * (rho12 - max_rho1)
-
-    return linear_term + constant_term
-
-def __large_neg_linear_deriv(rho1, rho2, rho12, 
-                             max_rho1, max_rho2, max_rho12):
-    """A large negative linear deriv when rho exceed max_rho."""
-
-    large_constant = float(1e10)
-
-    linear_deriv = np.zeros(3, dtype=np.float)
-
-    if rho1 > max_rho1: linear_deriv[0] = -large_constant
-    if rho2 > max_rho2: linear_deriv[1] = -large_constant
-    if rho12 > max_rho12: linear_deriv[2] = -large_constant
-
-    return linear_deriv
-

@@ -5,10 +5,9 @@ import numpy as np
 class JointFinalAge(object):
     """JointAgeOfOnset class
 
-    This class compute the count of patients as a distribution of the 
-    of the final age value. The patients are seperated by their 2 disease
-    phenotype status and the count are computed seperately for each phenotype
-    status.
+    This class compute the count of patients as a distribution of their final
+    age value. The patients are seperated by their 2 disease phenotype status
+    and the count are computed seperately for each phenotype status.
 
     Concretely, this class:
 

@@ -1,60 +1,119 @@
 #!/usr/bin/env python
 """
 SYNOPSIS
-    This script computes the p-value
+    This script computes the statistical significance (p-value) of observing
+    the EMR dataset for pair of diseases according to the genetic penetrance
+    models proposed in Rzhetsky et al. 2007 [1].
 
 DESCRIPTION
-    This script computes the p-value.
-    TODO: add details!
+
+    User specify the EMR data_file with -i flag and a pair of diseases with
+    --d1 and --d2 flags.
+
+    The scripts then computes and output the p-value for the specified disease
+    pair to (1) stdout and (2) "p_value.txt".
+
+    If the user doesn't specify a disease pair, then the p-value is
+    computed for all pairs of diseases with non-zero patient counts
+    (disease pairs generated from the 161 disease list).
+
+    A small p-value (e.g 0.05 significance level after Bonferroni correction),
+    would indicate that the chance of observing the EMR data given the null
+    hypothesis that the two diseases are not comorbid is highly unlikely and
+    hence the two disorders are likely be comorbid.
+    
+NOTES
+
+    Optional command line options:
+
+    User can set the value of genetic penetrance model's parameters: 
+        (1) --tau1 (default is 1)
+        (2) --tau2 (default is 1)
+        (3) --overlap_type (default is coorperative)
+        (4) --threshold_type (default is sharp)
+
+    User can specify how the patient counts in the EMR dataset is
+    normalized using the --norm_prval_method flag. The choices are:
+
+        (1) "Rzhetsky" (default): Use the exact normalization procedure
+            proposed in Rzhetsky et. al. 2007. In this case, the patient
+            hospitalization rate is assumed to be the identical for every
+            disease. This constant hospitalization rate is set so
+            that the prevalence of Schizophrenia patients in the EMR
+            dataset matches the prevalence of Schizophrenia in the general
+            population  (1.1%).
+
+        (2) "None": No patient counts normalization is performed.
+
+        (3) "max": Hospitalization rates are allowed to be different for
+            each individual disease. This allow the prevalence of the
+            each disease in the EMR dataset to be independently adjusted to
+            match the prevalence of that disease in the general population.
+            (see data/disease-prevalence.csv). Furthermore, the prevalence
+            of each disease-pair (D1 and D2) is adjusted so that the 
+            hospitalization rates of patients with both D1 and D2 is the
+            maximum of the hospitalization rate of patients with D1 and
+            hospitalization rate of patients with D2.
+
+        (4) "min": Same is (3) but replace "maximum" with "minimum"
+
+        (5) "avg": Same as (3) but replace "maximum" with "average"
+
+        (6) "wts": Same as (3) but replace "maximum" with "weighted"
+            average". The D1 and D2 hospitalization rate are weighted,
+            respectively, by the counts of patients with D1 and counts of 
+            patients with D2, 
+
+        (7) "sum" Same as (30 but replace "maximum" with sum".
+
+    We are currently investigating if normalization schemes (3), (4), (5) (6),
+    and (7) can potentially reduce the effect of Berkson's bias [2,3].
 
 EXAMPLES
 
     # Use all default parameters
-    python p_value.py
+    python p_value.py -i data/test_EMR_dataset.csv
 
     # Select disease pairs.
-    python p_value.py --d1 "Breast cancer (female)" --d2 "Epilepsy"
+    python p_value.py -i data/test_EMR_dataset.csv \
+                      --d1 "Breast cancer (female)" --d2 "Epilepsy"
 
-    python p_value.py --d1 "Attention deficit" --d2 "Epilepsy"
+    python p_value.py -i data/test_EMR_dataset.csv \
+                      --d1 "Attention deficit" --d2 "Epilepsy"
 
     # Select tau1 and tau2 values 
-    python p_value.py --tau1 6 --tau2 6
+    python p_value.py -i data/test_EMR_dataset.csv --tau1 6 --tau2 6
 
     # Select pravalence normalization method
-    python p_value.py --norm_prval_method avg
-
-    # Select EMR database
-    python test_optimize_log_likelihood.py \
-        --emr_data data/test_EMR_dataset.csv
+    python p_value.py -i data/test_EMR_dataset.csv --norm_prval_method avg
 
 AUTHOR
-    Parin Sripakdeevong <sripakpa@stanford.edu>"""
+    Parin Sripakdeevong <sripakpa@stanford.edu>
+
+REFERENCES:
+
+    [1] Rzhetsky, A., Wajngurt, D., Park, N. & Zheng, T. Probing genetic 
+        overlap among complex human phenotypes. Proc Natl Acad Sci U S A 
+        104, 11694-9 (2007).
+
+    [2] Berkson, J. Limitations of the application of fourfold table analysis
+        to hospital data. Biometrics 2, 47-53 (1946).
+
+    [3] http://en.wikipedia.org/wiki/Berkson's_paradox
+"""
 
 import sys
 import time
 import optparse
-import math
 
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy import optimize
 from scipy.stats import chi2
 
 from emr_database_class import EMRDatabase
-from genetic_penetrance_class import GeneticPenetrance
-from joint_age_of_onset_class import JointAgeOfOnset
-from joint_final_age_class import JointFinalAge
-from norm_prevalence_func import create_prval_norm_func
-from log_likelihood_func import create_log_likelihood_func
-from log_likelihood_func import create_log_likelihood_fprime
+from optimize_log_likelihood_class import OptimizeLogLikelihood
 
 def main():
 
     global options
-
-    # Pseudo-random number generator.
-    rng = np.random.RandomState(50)  # fixed seed
-    if options.use_random_seed: self.rng.seed()  
 
     # Import EMR data into database
     database = EMRDatabase()
@@ -64,6 +123,17 @@ def main():
                          options.code2disease_file)
 
 
+    # Instantiate the OptimizeLogLikelihood class
+    opt_log_likelihood = OptimizeLogLikelihood(options.verbose)
+    opt_log_likelihood.set_use_random_seed(options.use_random_seed)
+
+    f = open("p_value.txt", 'w')
+    f.write("D1, D2, overlap_type, ")
+    f.write("overlap_LL, indepedent_LL, ")
+    f.write("LLR, p_value\n")
+
+    # Compute p-value for specified disease pair or for all disease pairs with 
+    # non-zero patient counts.
     if options.disease1 != None and options.disease2 != None:
         D1_list = [options.disease1]
         D2_list = [options.disease2]
@@ -74,131 +144,106 @@ def main():
         D1_list = filtered_diseases
         D2_list = filtered_diseases
 
-    f = open("p_value_%s.txt" % options.norm_prval_method, 'w')
-
-    f.write("disease1, disease2, ")
-    f.write("coop_log_likelihood, indep_log_likelihood, ")
-    f.write("log_likelihood_ratio, p_value\n")
-
-
     for D1 in D1_list:
         for D2 in D2_list:
 
             if options.disease1 == None or options.disease2 == None:
                 if D1 >= D2: continue
 
-            print
-            print "--------------------------------------------------"
-            print "D1 = %s, D2 = %s" % (D1, D2)
+            print "-" * 80
+            print "D1= %s, D2= %s," % (D1, D2),
+            print "overlap_type= %s" % options.overlap_type
+
+            # Independent (no genetic overlap) model
+            indep_log_likelihood = (
+                __compute_log_likelihood_wrapper(opt_log_likelihood,
+                                                 database,
+                                                 D1, D2,
+                                                 options.tau1,
+                                                 options.tau2,
+                                                 "independent",
+                                                 options.threshold_type,
+                                                 options.prevalence_file,
+                                                 options.norm_prval_method))
+
+            min_log_likelihood = indep_log_likelihood - 1.0
+
+            # Allow genetic overlap model
+            overlap_log_likelihood = (
+                __compute_log_likelihood_wrapper(opt_log_likelihood,
+                                                 database,
+                                                 D1, D2,
+                                                 options.tau1,
+                                                 options.tau2,
+                                                 options.overlap_type,
+                                                 options.threshold_type,
+                                                 options.prevalence_file,
+                                                 options.norm_prval_method,
+                                                 min_log_likelihood))
 
 
-            # Query patients data
-            D1orD2_patients = database.query_emr_data([D1, D2], OR_match = True)
-            noD1D2_patients = database.query_emr_data(["not " + D1, "not " + D2])
+            log_likelihood_ratio = 2.0 * (overlap_log_likelihood -
+                                          indep_log_likelihood)
 
+            # Degree of freedoms of the chi-square distribution.
+            dof = 1  
 
-            raw_count = np.zeros(4, dtype=np.float)
-
-            raw_count[0] = len(database.query_emr_data(["not " + D1, "not " + D2]))
-            raw_count[1] = len(database.query_emr_data([D1, "not " + D2]))
-            raw_count[2] = len(database.query_emr_data([D2, "not " + D1]))
-            raw_count[3] = len(database.query_emr_data([D2, D1]))
-
-            # Create a function that will normalize the raw EMR data to match the
-            # general population disease prevalence.
-            prval_norm_func = create_prval_norm_func(D1, D2,
-                                                     database.get_disease2count(),
-                                                     database.get_tot_patient_count(),
-                                                     options.prevalence_file,
-                                                     options.norm_prval_method,
-                                                     options.verbose)
-
-            norm_count = prval_norm_func(raw_count)
-
-            print "raw_count:"
-            print "D0: %7.1f, " % raw_count[0],
-            print "D1: %7.1f, " % raw_count[1],
-            print "D2: %7.1f, " % raw_count[2],
-            print "D12: %7.1f, " % raw_count[3],
-            print "E[D12]: %7.1f" % (raw_count[1] *
-                                     raw_count[2] /
-                                     np.sum(raw_count))
-            print "norm_count:"
-            print "D0: %7.1f, " % norm_count[0],
-            print "D1: %7.1f, " % norm_count[1],
-            print "D2: %7.1f, " % norm_count[2],
-            print "D12: %7.1f, " % norm_count[3],
-            print "E[D12]: %7.1f" % (norm_count[1] *
-                                     norm_count[2] /
-                                     np.sum(norm_count))
-
-            sys.stdout.flush()
-
-            # Conditional probabilities: P(phi(t) | phi(infty))
-            joint_age_of_onset = JointAgeOfOnset(D1orD2_patients)
-
-            joint_age_of_onset_funcs = joint_age_of_onset.get_funcs()
-
-            # Patient counts of as a distribution of the final age value.
-            joint_final_age = JointFinalAge(D1orD2_patients, noD1D2_patients)
-
-            final_age_array = joint_final_age.get_final_age_array()
-            patient_counts = joint_final_age.get_patient_counts()
-
-
-            # Independent model
-            inde_optimized_param = (
-                __get_optimized_parameters_wrapper(options.tau1,
-                                                   options.tau2,
-                                                   "independent",
-                                                   options.threshold_type,
-                                                   options.opt_method,
-                                                   options.verbose,
-                                                   joint_age_of_onset_funcs,
-                                                   patient_counts,
-                                                   final_age_array,
-                                                   prval_norm_func,
-                                                   rng))
-
-            inde_log_likelihood = inde_optimized_param["log_likelihood"]
-
-            min_log_likelihood = inde_log_likelihood - 1.0
-
-            # Cooperative model
-            coop_optimized_param = (
-                __get_optimized_parameters_wrapper(options.tau1,
-                                                   options.tau2,
-                                                   "cooperation",
-                                                   options.threshold_type,
-                                                   options.opt_method,
-                                                   options.verbose,
-                                                   joint_age_of_onset_funcs,
-                                                   patient_counts,
-                                                   final_age_array,
-                                                   prval_norm_func,
-                                                   rng,
-                                                   min_log_likelihood))
-
-            coop_log_likelihood = coop_optimized_param["log_likelihood"]
-
-            log_likelihood_ratio = 2.0 * (coop_log_likelihood -
-                                          inde_log_likelihood)
-
-            print "coop_log_likelihood= ", coop_log_likelihood
-            print "inde_log_likelihood= ", inde_log_likelihood
-            print "log_likelihood_ratio=", log_likelihood_ratio
-
-            dof = 1  # degree of freedoms
+            # p-value is the area at the right tail of the chi-square
+            # distribution
             p_value = 1.0 - chi2.cdf(log_likelihood_ratio, dof)
 
-            text = "%s, %s, " %(D1, D2)
-            text += "%.3f, %.3f, " %(coop_log_likelihood, inde_log_likelihood)
-            text += "%.5f, %s" % (log_likelihood_ratio, p_value)
+            text = "%s, %s, %s," % (D1, D2, options.overlap_type)
+            text += "%.3E, " % overlap_log_likelihood
+            text += "%.3E, " % indep_log_likelihood
+            text += "%.3E, %.3E" % (log_likelihood_ratio, p_value)
 
-            print text
+            print "overlap_LL= %.2E," % overlap_log_likelihood,
+            print "indep_LL= %.2E," % indep_log_likelihood,
+            print "LLR= %.2E," % log_likelihood_ratio,
+            print "p_value= %.2E" % p_value
+            print "-" * 80
+            print
+
+
             f.write(text + '\n')
 
     f.close()
+
+def __compute_log_likelihood_wrapper(opt_log_likelihood,
+                                     database,
+                                     D1, D2,
+                                     tau1, tau2,
+                                     overlap_type,
+                                     threshold_type,
+                                     prevalence_file,
+                                     norm_prval_method,
+                                     min_log_likelihood=None):
+    """Setup log_likelihood function and then compute the optimized log 
+    likelihood value.
+
+    Notes
+    -----
+    Rerun optimization until the optimal log_likelihood is greater
+    than the specified min_log_likelihood value.
+    """
+
+    opt_log_likelihood.setup_log_likelihood_func(database,
+                                                 D1, D2,
+                                                 tau1, tau2,
+                                                 overlap_type,
+                                                 threshold_type,
+                                                 prevalence_file,
+                                                 norm_prval_method)
+
+    while True:
+
+        log_likelihood, _, _ = opt_log_likelihood.run()
+
+        if min_log_likelihood == None: break
+
+        if log_likelihood > min_log_likelihood: break
+
+    return log_likelihood
 
 def __filter_diseases(diseases, database):
     """Filter for diseases where patients counts for disease is non-zero."""
@@ -212,182 +257,17 @@ def __filter_diseases(diseases, database):
 
     return filtered_Ds
 
-def __get_optimized_parameters_wrapper(tau1, 
-                                       tau2,
-                                       overlap_type,
-                                       threshold_type,
-                                       opt_method,
-                                       verbose,
-                                       joint_age_of_onset_funcs,
-                                       patient_counts,
-                                       final_age_array,
-                                       prval_norm_func,
-                                       rng,
-                                       min_log_likelihood=None):
-    """TODO: add description"""
-
-    # Setup the genetic_penetrance model to compute the age-integrated
-    # phenotype probabilities: P(phi(infty) ; rho1, rho2, rho12)
-    genetic_penetrance = GeneticPenetrance(tau1,
-                                           tau2,
-                                           overlap_type,
-                                           threshold_type)
-
-    # Function to evaluate log-likelihood at given rho1, rho2 and rho12.
-    log_likelihood_func = create_log_likelihood_func(genetic_penetrance,
-                                                     joint_age_of_onset_funcs,
-                                                     patient_counts,
-                                                     final_age_array,
-                                                     prval_norm_func)
-
-    # Function to evaluate the derivative of the log-likelihod wrt
-    # to rho1, rho2 and rho12.
-    log_likelihood_fprime = (
-        create_log_likelihood_fprime(genetic_penetrance,
-                                     joint_age_of_onset_funcs,
-                                     patient_counts,
-                                     final_age_array,
-                                     prval_norm_func))
-
-
-    (rho1_max, rho2_max) = (1.0 * tau1, 1.0 * tau2)
-
-    rho12_max = (rho1_max + rho2_max) / 2.0
-
-    while True:
-
-        optimized_param = __get_optimized_parameters(log_likelihood_func,
-                                                     log_likelihood_fprime,
-                                                     rng,
-                                                     rho1_max,
-                                                     rho2_max,
-                                                     rho12_max,
-                                                     overlap_type,
-                                                     opt_method,
-                                                     verbose)
-
-        if min_log_likelihood == None: break
-
-        if optimized_param["log_likelihood"] > min_log_likelihood: break
-
-
-    return optimized_param
-
-
-def __get_optimized_parameters(log_likelihood_func, log_likelihood_fprime,
-                               rng, rho1_max, rho2_max, rho12_max,
-                               overlap_type, opt_method, verbose):
-    """Compute parameter that maximize the log_likelihood value.
-
-    Returns
-    -------
-    opt_param: a dictionary
-        Dictionary containing the parameter that maximize the log_likelihood.
-        The key-value pairs are :
-            "rho1" : value of rho1 (float)
-            "rho2" : value of rho2 (float)
-            "rho12" : value of rho12 (float)
-    """
-
-    # uniform distribution over (0, 1]
-    (rho1, rho2, rho12) = rng.rand(3) + 1.0e-20
-
-    (rho1, rho2, rho12) = (rho1 * rho1_max,
-                           rho2 * rho2_max,
-                           rho12 * rho12_max)
-
-    print "start: rho1 = %.3f, rho2 = %.3f, rho12 = %.3f" % (rho1,
-                                                             rho2,
-                                                             rho12)
-
-    log_rho = True
-    log_rho1 = math.log(rho1)
-    log_rho2 = math.log(rho2)
-    log_rho12 = math.log(rho12)
-
-    sign = -1.0 # maximize instead of minimize.
-
-    minimize_test = __get_test_optimization_func(opt_method)
-
-    start_time = time.time()
-    xopt, allvec = minimize_test(log_likelihood_func,
-                                 [log_rho1, log_rho2, log_rho12],
-                                 args=(log_rho, sign,),
-                                 fprime=log_likelihood_fprime)
-
-    print "overlap_type = %s" % overlap_type 
-    print " " * 8, 'minimize_time = %.3f secs' % (time.time() - start_time)
-    print " " * 8, "rho1 = %.3f, rho2 = %.3f, rho12 = %.3f" % (np.exp(xopt[0]),
-                                                               np.exp(xopt[1]),
-                                                               np.exp(xopt[2]))
-    if verbose:
-        for n, point in enumerate(allvec):
-            print " " * 8,
-            print "%3d: rho1, rho2, rho12, log_likelihood = " % n,
-            print "%.3f " % np.exp(point[0]),
-            print "%.3f " % np.exp(point[1]),
-            print "%.3f " % np.exp(point[2]),
-            print "%.3f" % log_likelihood_func(point)
-        print
-
-    opt_param = dict()
-
-    opt_param["rho1"] = np.exp(xopt[0])
-    opt_param["rho2"] = np.exp(xopt[1])
-    opt_param["rho12"] = np.exp(xopt[2])
-    opt_param["log_likelihood"] = log_likelihood_func(xopt)
-
-    if options.overlap_type == "independent": opt_param["rho12"] = 0.0
-
-    return opt_param
-
-def __get_test_optimization_func(opt_method):
-    """Select and return the specified test optimization function.
-
-    Use this function to experiment with different values of gtol and ftol
-        gtol: float (scipy defualt is 1e-05)
-            Gradient tolerance, stop when norm of gradient is less than gtol.
-        ftol : float (scipy defualt is 0.0001)
-            Function tolerance, relative error in func(xopt) acceptable for 
-            convergence.
-    """
-
-    gtol_test = 0.001
-    ftol_test = 0.001
-
-    if opt_method == 'Nelder-Mead':
-        def minimize(f, x0, args=(), fprime=None):
-            return optimize.fmin(f, x0, args=args, ftol=ftol_test,
-                                 retall=True)
-    elif opt_method == 'Powell':
-        def minimize(f, x0, args=(), fprime=None):
-            return optimize.fmin_powell(f, x0, args=args, ftol=ftol_test, 
-                                        retall=True)
-    elif opt_method == 'CG':
-        def minimize(f, x0, args=(), fprime=None):
-            return optimize.fmin_cg(f, x0, args=args, gtol=gtol_test,
-                                    retall=True)
-    elif opt_method == 'BFGS':
-        def minimize(f, x0, args=(), fprime=None):
-            return optimize.fmin_bfgs(f, x0, args=args, gtol=gtol_test,
-                                      retall=True)
-    else:
-        raise ValueError("Unvalid opt_method %s" % opt_method)
-
-    return minimize
-
-
 if __name__ == '__main__':
 
     start_time = time.time()
 
-    usage = """test_optimize_log_likelihood.py -i <emr_data_file> 
-            --d1 <1st_disease> --d2 <2nd_disease>"""
+    usage = """python p_value.py -i <emr_data_file> --d1 <1st_disease_name> 
+            --d2 <2nd_disease_name>"""
 
     parser = optparse.OptionParser(usage=usage + globals()['__doc__'])
 
     parser.add_option("-i", "--emr_data", action="store", type="string",
-                      default="data/test_EMR_dataset.csv",
+                      default=None,
                       dest="emr_data_file",
                       help="RAW EMR data file")
 
@@ -427,10 +307,6 @@ if __name__ == '__main__':
                       default=1, dest="tau2", 
                       help="tau2 parameter of the genetic penetrance model.")
 
-    parser.add_option("--rho12", default=1.0, action="store", type="float",
-                      dest="rho12", 
-                      help="rho12 parameter of the genetic penetrance model.")
-
     parser.add_option("--overlap_type",  action="store",  type="string",
                       default="cooperation", dest="overlap_type",
                       help="type of genetic overlap used in the model.")
@@ -439,22 +315,14 @@ if __name__ == '__main__':
                       default="sharp", dest="threshold_type", 
                       help="type of genetic penetrance used in the model.")
 
-    parser.add_option("--num_paths", action="store", type="int",
-                      default=5, dest="num_paths", 
-                      help="number of optimization paths to compute.")
-
     parser.add_option("--use_random_seed", action="store_true", default=False,
                       dest="use_random_seed",
                       help="random seed for pseudo-random number generator")
 
-    parser.add_option("--opt_method", type="string",  action="store",
-                      default='BFGS', dest="opt_method",
-                      help="name of the optimization method.")
-
-    parser.add_option("-v", "--verbose", action="store_true", default=True,
+    parser.add_option("-v", "--verbose", action="store_true", default=False,
                       dest="verbose", help="verbose output.")
 
-    parser.add_option("--no_verbose", action="store_false", default=True,
+    parser.add_option("--no_verbose", action="store_false", default=False,
                       dest="verbose", help="no verbose output.")
 
     (options, args) = parser.parse_args()
@@ -462,26 +330,25 @@ if __name__ == '__main__':
     if len(args) != 0:
         parser.error("leftover arguments=%s" % args)
 
+    if not options.emr_data_file:
+        parser.error("option -i required")
+
     if options.norm_prval_method == "None":
         options.norm_prval_method = None
 
     if options.norm_prval_method not in [None, "Rzhetsky", "max", "min", "avg",
-                                         "wts_avg", "sum","independent"]:
+                                         "wts_avg", "sum"]:
 
         raise ValueError("invalid --norm_prval_method %s " %
                          options.norm_prval_method)
 
     if options.overlap_type not in ["cooperation",
-                                    "competition",
-                                    "independent"]:
+                                    "competition"]:
         raise ValueError("invalid --overlap_type %s " % options.overlap_type)
 
     if options.threshold_type not in ["sharp", "soft"]:
         raise ValueError("invalid --threshold_type %s " %
                          options.threshold_type)
-
-    if options.opt_method not in ['Nelder-Mead', 'Powell', 'CG', 'BFGS']:
-        raise ValueError("invalid --opt_method %s " % options.opt_method)
 
     if options.verbose:
         print "-" * 50
@@ -509,9 +376,7 @@ if __name__ == '__main__':
         print
         print "Plotting parameters:"
         print "--------------------"
-        print "num_paths: %s" % options.num_paths
         print "use_random_seed: %s" % options.use_random_seed
-        print "optimization_method %s" % options.opt_method
         print "-" * 50
 
     main()

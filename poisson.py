@@ -30,7 +30,6 @@ def pmf(k, mu):
         else:
             return 0.0 # use limit value as mu -> 0.0, k > 0
 
-
     pmf = mu ** k
     pmf *= math.exp(-mu) 
     pmf /= math.factorial(k)
@@ -61,7 +60,6 @@ def dpmf_dmu(k, mu):
     deriv = ((float(k) / mu) - 1) * pmf(k, mu)
 
     return deriv
-
 
 def cdf(kmax, mu):
     """Poisson cummulative distribution function.

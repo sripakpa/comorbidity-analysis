@@ -274,7 +274,10 @@ class EMRDatabase(object):
             Acute leukemia
             Acute promyelocytic leukemia
         """
-        
+
+        if infile == None:
+            raise RuntimeError("No diseases_file specified!")
+
         self.diseases = list()
 
         for line in open(infile):
@@ -302,6 +305,9 @@ class EMRDatabase(object):
             One disease can map to multiple ICD-9 code, but each ICD-9 code
             can only map to one disease.
         """
+
+        if infile == None:
+            raise RuntimeError("No code2disease_file specified!")
 
         self.code2disease = dict()
 
@@ -381,6 +387,9 @@ class EMRDatabase(object):
         Will assumes that the gender and ethnicity of a patient
         cannot change between visits.
         """
+
+        if data_file == None:
+            raise RuntimeError("No EMR_data_file specified!")
 
         self.non_disease_data = dict()
 

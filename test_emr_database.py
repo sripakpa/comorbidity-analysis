@@ -15,10 +15,10 @@ EXAMPLES
     # Standard
     python test_emr_database.py -i data/test_EMR_dataset.csv
 
-    # Specify diseases_file and code2disease_file -v -c 
+    # Specify diseases_file and code2disease_file
     python test_emr_database.py -i data/test_EMR_dataset.csv \
            --diseases_file data/disease-list.txt \
-           --code2disease_file data/code-to-disease.csv 
+           --code2disease_file data/code-to-disease.csv
 
 AUTHOR
     Parin Sripakdeevong <sripakpa@stanford.edu>"""

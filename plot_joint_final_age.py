@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 """
 SYNOPSIS
-    This script plots the joint patient's final-age distribution for a pair of
-    diseases using the data derived from the EMR dataset.
+    This script plots the count of patients as a distribution of their final
+    age value. The patients are seperated by their 2 disease phenotype status
+    and the count are computed seperately for each phenotype status.
 
 DESCRIPTION
     For each pair of diseases D1 and D2, there are four possible phenotype

@@ -29,8 +29,8 @@ def create_prval_norm_func(D1, D2,
     prevalence_file: string
         Location of the prevalence data file
 
-    norm_prval_method: [None, "rzhetsky", "max", "min", "avg",
-                        "wts_avg", "sum", "independent"]
+    norm_prval_method : [None, "rzhetsky", "max", "min",
+                         "avg", "wts_avg", "sum"]
         Protocol to normalize the prevalence data.
 
     verbose: bool, optional

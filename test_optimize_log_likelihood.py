@@ -50,8 +50,8 @@ DESCRIPTION
             (3) --overlap_type (default is coorperative)
             (4) --threshold_type (default is sharp)
 
-        User can set the EMR dataset and disease pair D1 and D2:
-            (1) --emr_data (default is data/test_EMR_dataset.csv)
+        User can set the EMR data_file and disease pair D1 and D2:
+            (1) -i (default is data/test_EMR_dataset.csv)
             (2) --d1 (default is "Breast cancer (female)")
             (3) --d2 (default is "Epilepsy")
 
@@ -59,6 +59,9 @@ EXAMPLES
 
     # Use all default parameters
     python test_optimize_log_likelihood.py
+
+    # Select EMR database
+    python test_optimize_log_likelihood.py -i data/test_EMR_dataset.csv
 
     # Select tau1 and tau2 values 
     python test_optimize_log_likelihood.py --tau1 6 --tau2 6
@@ -79,10 +82,6 @@ EXAMPLES
     python test_optimize_log_likelihood.py \
         --d1 "Attention deficit" --d2 "Autism"
 
-    # Select EMR database
-    python test_optimize_log_likelihood.py \
-        --emr_data data/test_EMR_dataset.csv
-
 AUTHOR
     Parin Sripakdeevong <sripakpa@stanford.edu>"""
 
@@ -93,23 +92,17 @@ import math
 
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy import optimize
 
 from emr_database_class import EMRDatabase
-from genetic_penetrance_class import GeneticPenetrance
-from joint_age_of_onset_class import JointAgeOfOnset
-from joint_final_age_class import JointFinalAge
-from norm_prevalence_func import create_prval_norm_func
+from optimize_log_likelihood_class import OptimizeLogLikelihood
 from log_likelihood_func import create_log_likelihood_func
-from log_likelihood_func import create_log_likelihood_fprime
 
 def main():
 
     global options
 
-    # Pseudo-random number generator.
-    rng = np.random.RandomState(50)  # fixed seed
-    if options.use_random_seed: self.rng.seed()  
+    D1 = options.disease1
+    D2 = options.disease2
 
     # Import EMR data into database
     database = EMRDatabase()
@@ -118,261 +111,51 @@ def main():
                          options.diseases_file,
                          options.code2disease_file)
 
-    D1 = options.disease1
-    D2 = options.disease2
+    # Instantiate the OptimizeLogLikelihood class
+    opt_log_likelihood = OptimizeLogLikelihood(options.verbose)
+    opt_log_likelihood.set_opt_method(options.opt_method)
+    opt_log_likelihood.set_use_random_seed(options.use_random_seed)
 
-    # Query patients data
-    D1orD2_patients = database.query_emr_data([D1, D2], OR_match = True)
-    noD1D2_patients = database.query_emr_data(["not " + D1, "not " + D2])
-
-    # Setup the genetic_penetrance model to compute the age-integrated
-    # phenotype probabilities: P(phi(infty) ; rho1, rho2, rho12)
-    genetic_penetrance = GeneticPenetrance(options.tau1,
-                                           options.tau2,
-                                           options.overlap_type,
-                                           options.threshold_type)
-
-    # Create a function that will normalize the raw EMR data to match the
-    # general population disease prevalence.
-    prval_norm_func = create_prval_norm_func(D1, D2,
-                                             database.get_disease2count(),
-                                             database.get_tot_patient_count(),
-                                             options.prevalence_file,
-                                             options.norm_prval_method,
-                                             options.verbose)
-
-    # Conditional probabilities: P(phi(t) | phi(infty))
-    joint_age_of_onset = JointAgeOfOnset(D1orD2_patients)
-
-    joint_age_of_onset_funcs = joint_age_of_onset.get_funcs()
-
-    # Patient counts of as a distribution of the final age value.
-    joint_final_age = JointFinalAge(D1orD2_patients, noD1D2_patients)
-
-    final_age_array = joint_final_age.get_final_age_array()
-    patient_counts = joint_final_age.get_patient_counts()
-
-    # Function to evaluate log-likelihood at given rho1, rho2 and rho12.
-    log_likelihood_func = create_log_likelihood_func(genetic_penetrance,
-                                                     joint_age_of_onset_funcs,
-                                                     patient_counts,
-                                                     final_age_array,
-                                                     prval_norm_func)
-
-    # Function to evaluate the derivative of the log-likelihod wrt
-    # to rho1, rho2 and rho12.
-    log_likelihood_fprime = (
-        create_log_likelihood_fprime(genetic_penetrance,
-                                     joint_age_of_onset_funcs,
-                                     patient_counts,
-                                     final_age_array,
-                                     prval_norm_func))
-
-
-    (rho1_max, rho2_max) = (3.0 * options.tau1, 3.0 * options.tau2)
-
-    rho12_max = (rho1_max + rho2_max) / 2.0
-
-    optimized_param = __get_optimized_parameters(log_likelihood_func,
-                                                 log_likelihood_fprime,
-                                                 rng,
-                                                 rho1_max,
-                                                 rho2_max,
-                                                 rho12_max,
+    opt_log_likelihood.setup_log_likelihood_func(database,
+                                                 D1, D2,
+                                                 options.tau1,
+                                                 options.tau2,
                                                  options.overlap_type,
-                                                 options.opt_method,
-                                                 options.verbose)
+                                                 options.threshold_type,
+                                                 options.prevalence_file,
+                                                 options.norm_prval_method)
 
-    optimization_paths = __compute_optimization_paths(log_likelihood_func,
-                                                      log_likelihood_fprime,
-                                                      rng,
-                                                      rho1_max, 
-                                                      rho2_max,
-                                                      rho12_max,
-                                                      options.overlap_type,
-                                                      options.opt_method,
-                                                      options.num_paths,
-                                                      options.verbose)
+    # Get optimized parameters
+    _, optimized_param, _ = opt_log_likelihood.run()
+
+    # Compute optimization paths
+    optimization_paths = []
+    for n in range(options.num_paths):
+        _, _, path = opt_log_likelihood.run(save_path=True)
+        optimization_paths.append(path)
+
+    log_likelihood_func = opt_log_likelihood.get_log_likelihood_func()
 
     plot = __plot_contour(log_likelihood_func,
                           optimized_param,
                           optimization_paths,
-                          genetic_penetrance,
+                          tau1, tau2,
+                          overlap_type,
+                          threshold_type,
                           options.norm_prval_method,
-                          D1, D2,
                           options.verbose)
 
     plt.show()
 
-def __get_optimized_parameters(log_likelihood_func, log_likelihood_fprime,
-                               rng, rho1_max, rho2_max, rho12_max,
-                               overlap_type, opt_method, verbose):
-    """Compute parameter that maximize the log_likelihood value.
-
-    Returns
-    -------
-    opt_param: a dictionary
-        Dictionary containing the parameter that maximize the log_likelihood.
-        The key-value pairs are :
-            "rho1" : value of rho1 (float)
-            "rho2" : value of rho2 (float)
-            "rho12" : value of rho12 (float)
-    """
-
-    # uniform distribution over (0, 1]
-    (rho1, rho2, rho12) = rng.rand(3) + 1.0e-20
-
-    (rho1, rho2, rho12) = (rho1 * rho1_max,
-                           rho2 * rho2_max,
-                           rho12 * rho12_max)
-
-    print "start: rho1 = %.3f, rho2 = %.3f, rho12 = %.3f" % (rho1,
-                                                             rho2,
-                                                             rho12)
-
-    log_rho = True
-    log_rho1 = math.log(rho1)
-    log_rho2 = math.log(rho2)
-    log_rho12 = math.log(rho12)
-
-    # if overlap_type == "independent": rho12 = 0.0
-
-    sign = -1.0 # maximize instead of minimize.
-
-    minimize_test = __get_test_optimization_func(opt_method)
-
-    start_time = time.time()
-    xopt, allvec = minimize_test(log_likelihood_func,
-                                 [log_rho1, log_rho2, log_rho12],
-                                 args=(log_rho, sign,),
-                                 fprime=log_likelihood_fprime)
-
-    print " " * 8, 'minimize_time = %.3f secs' % (time.time() - start_time)
-    print " " * 8, "rho1 = %.3f, rho2 = %.3f, rho12 = %.3f" % (np.exp(xopt[0]),
-                                                               np.exp(xopt[1]),
-                                                               np.exp(xopt[2]))
-    if verbose:
-        for n, point in enumerate(allvec):
-            print " " * 8,
-            print "%3d: rho1, rho2, rho12, log_likelihood = " % n,
-            print "%.3f " % np.exp(point[0]),
-            print "%.3f " % np.exp(point[1]),
-            print "%.3f " % np.exp(point[2]),
-            print "%.3f" % log_likelihood_func(point)
-        print
-
-    opt_param = dict()
-
-    opt_param["rho1"] = np.exp(xopt[0])
-    opt_param["rho2"] = np.exp(xopt[1])
-
-    if options.overlap_type == "independent": 
-        opt_param["rho12"] = 0.0
-    else:
-        opt_param["rho12"] = np.exp(xopt[2])
-
-
-    return opt_param
-
-def __compute_optimization_paths(log_likelihood_func, log_likelihood_fprime,
-                                 rng, rho1_max, rho2_max, rho12_max, 
-                                 overlap_type, opt_method, num_paths, verbose):
-    """Compute optimization paths starting from random points in the parameter
-    space.
-
-    Returns
-    -------
-    paths : list of dictionary
-        Each paths[i] is a dictionary contain information about the ith
-        optimization path.
-
-        path : dictionary
-            Information at all iterations along the optimization path stored
-            in the following key-value pairs:
-                "rho1" : list of rho1 values.
-                "rho2" : list of rho2 values. 
-                "rho12" : list of rho12 values. 
-                "log_likelihood" : list of log_likelihood value.
-            The jth element of each list store the the value at the jth 
-            optimization iteration step.
-    """
-
-    paths = []
-
-    for n in range(num_paths):
-
-        # uniform distribution over (0, 1]
-        (rho1, rho2, rho12) = rng.rand(3) + 1.0e-20
-
-        (rho1, rho2, rho12) = (rho1 * rho1_max,
-                               rho2 * rho2_max,
-                               rho12 * rho12_max)
-
-        print "start: rho1 = %.3f, rho2 = %.3f, rho12 = %.3f" % (rho1,
-                                                                 rho2,
-                                                                 rho12)
-
-        log_rho = True
-        log_rho1 = math.log(rho1)
-        log_rho2 = math.log(rho2)
-        log_rho12 = math.log(rho12)
-
-        # if overlap_type == "independent": rho12 = 0.0
-
-        sign = -1.0 # maximize instead of minimize.
-
-        minimize_test = __get_test_optimization_func(opt_method)
-
-        start_time = time.time()
-        xopt, allvec = minimize_test(log_likelihood_func,
-                                     [log_rho1, log_rho2, log_rho12],
-                                     args=(log_rho, sign,),
-                                     fprime=log_likelihood_fprime)
-        print " " * 8,
-        print 'minimize_time = %.3f secs' % (time.time() - start_time)
-        print " " * 8,
-        print "rho1 = %.3f, rho2 = %.3f, rho12 = %.3f" % (np.exp(xopt[0]),
-                                                          np.exp(xopt[1]),
-                                                          np.exp(xopt[2]))
-        if verbose:
-            for n, point in enumerate(allvec):
-                print " " * 8,
-                print "%3d: rho1, rho2, rho12, log_likelihood = " % n,
-                print "%.3f " % np.exp(point[0]),
-                print "%.3f " % np.exp(point[1]),
-                print "%.3f " % np.exp(point[2]),
-                print "%.3f" % log_likelihood_func(point)
-            print
-
-        path = {'rho1' : [], 'rho2': [], 'rho12': [], 'log_likelihood': []}
-        for n, point in enumerate(allvec):
-            path['rho1'].append(np.exp(point[0]))
-            path['rho2'].append(np.exp(point[1]))
-
-            if options.overlap_type == "independent":
-                path['rho12'].append(0)
-            else:
-                path['rho12'].append(np.exp(point[2]))
-
-            path['log_likelihood'].append(log_likelihood_func(point))
-
-        paths.append(path)
-
-    return paths
-
 def __plot_contour(log_likelihood_func,
                    opt_param,
                    optimization_paths,
-                   genetic_penetrance,
+                   tau1, tau2,
+                   overlap_type,
+                   threshold_type,
                    norm_prval_method,
-                   D1, D2,
                    verbose):
     """Plot and save the log_likelihood contour with pyplot."""
-
-    tau1 = genetic_penetrance.get_tau1()
-    tau2 = genetic_penetrance.get_tau2()
-    overlap_type = genetic_penetrance.get_overlap_type()
-    threshold_type = genetic_penetrance.get_threshold_type()
 
     # Set log_likelihood_func, optimization_paths, tau1, tau2, opt_param
     def subplot_contour(subplot, x_dim, y_dim, const_dim):
@@ -435,44 +218,6 @@ def __plot_contour(log_likelihood_func,
     plt.savefig(fig_name, format='png') 
 
     return plt
-
-
-def __get_test_optimization_func(opt_method):
-    """Select and return the specified test optimization function.
-
-    Use this function to experiment with different values of gtol and ftol
-        gtol: float (scipy defualt is 1e-05)
-            Gradient tolerance, stop when norm of gradient is less than gtol.
-        ftol : float (scipy defualt is 0.0001)
-            Function tolerance, relative error in func(xopt) acceptable for 
-            convergence.
-    """
-
-    gtol_test = 0.001
-    ftol_test = 0.001
-
-    if opt_method == 'Nelder-Mead':
-        def minimize(f, x0, args=(), fprime=None):
-            return optimize.fmin(f, x0, args=args, ftol=ftol_test,
-                                 retall=True)
-    elif opt_method == 'Powell':
-        def minimize(f, x0, args=(), fprime=None):
-            return optimize.fmin_powell(f, x0, args=args, ftol=ftol_test, 
-                                        retall=True)
-    elif opt_method == 'CG':
-        def minimize(f, x0, args=(), fprime=None):
-            return optimize.fmin_cg(f, x0, args=args, gtol=gtol_test,
-                                    retall=True)
-        # fprime=fprime,
-    elif opt_method == 'BFGS':
-        def minimize(f, x0, args=(), fprime=None):
-            return optimize.fmin_bfgs(f, x0, args=args, gtol=gtol_test,
-                                      retall=True)
-        # fprime=fprime,
-    else:
-        raise ValueError("Unvalid opt_method %s" % opt_method)
-
-    return minimize
 
 
 def __compute_rho_rmsd(opt_param, optimization_paths):
@@ -716,10 +461,6 @@ if __name__ == '__main__':
                       default=1, dest="tau2", 
                       help="tau2 parameter of the genetic penetrance model.")
 
-    parser.add_option("--rho12", default=1.0, action="store", type="float",
-                      dest="rho12", 
-                      help="rho12 parameter of the genetic penetrance model.")
-
     parser.add_option("--overlap_type",  action="store",  type="string",
                       default="cooperation", dest="overlap_type",
                       help="type of genetic overlap used in the model.")
@@ -800,7 +541,7 @@ if __name__ == '__main__':
         print "--------------------"
         print "num_paths: %s" % options.num_paths
         print "use_random_seed: %s" % options.use_random_seed
-        print "optimization_method %s" % options.opt_method
+        print "optimization_method: %s" % options.opt_method
         print "-" * 50
 
     main()
