@@ -139,9 +139,10 @@ def main():
     plot = __plot_contour(log_likelihood_func,
                           optimized_param,
                           optimization_paths,
-                          tau1, tau2,
-                          overlap_type,
-                          threshold_type,
+                          options.tau1,
+                          options.tau2,
+                          options.overlap_type,
+                          options.threshold_type,
                           options.norm_prval_method,
                           options.verbose)
 
