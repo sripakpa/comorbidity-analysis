@@ -41,15 +41,15 @@ DATA:
 
     (2) data/disease-list.txt
 
-        A list of the 161 diseases investigated in this study
+        A list of the 161 diseases investigated in this study.
 
     (3) data/code-to-disease.csv
 
-        A CSV file mapping ICD9 codes to disease names
+        A CSV file mapping ICD-9 codes to disease names.
 
     (4) data/disease-prevalence.csv
 
-        A list of disease prevalence estimates in the general population 
+        A list of disease prevalence estimates in the general population.
 
 DESCRIPTIONS:
 
