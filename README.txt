@@ -36,7 +36,8 @@ DATA:
 
         The actual STRIDE EMR dataset is not included in this repository due
         to the sensitive nature of the data. Instead we include a test EMR
-        dataset consisting of 48,000 "mock" patients records for 6 diseases.
+        dataset consisting of 48,000 "mock" patient medical records for 6
+        diseases.
 
     (2) data/disease-list.txt
 
