@@ -1,8 +1,8 @@
 INTRODUCTION:
 
     The python package contains scripts for data mining of the Electronic
-    Medical Records (EMR) to predict predict diseases comorbidities and
-    correlations.
+    Medical Records (EMR) to predict predict diseases genetic overlaps and 
+    comorbidities.
     
     The models used here is an extension of the probabilistic model proposed
     in Rzhetsky et. al. 2007 [1].
@@ -12,17 +12,17 @@ INTRODUCTION:
     Database Environment (STRIDE) [2]. The EMR dataset consist of anoynmized
     statistics of over 1 million patient records for 161 diseases.
 
-    This package is a work in-progress and questions that are actively being
-    investigated includes:
+    This package is a work in-progress. Questions that are actively being
+    investigated include:
 
     (1) How accurately can the EMR dataset predict diseases comorbidities
-        when assessed on a benchmark of 300 known diseases commordity curated
+        when assessed on a benchmark of 300 known comorbidities curated from
         from the literature?
 
     (2) Differing rates of hospitalization for each diseases can lead to
         bias in the EMR counts. This is a well known problem in
-        epidemiology study called the Berkson's bias [3, 4]. How strongly does
-        Berkson's bias effect the accuracy of the diseases comorbidities
+        epidemiological study called the Berkson's bias [3, 4]. How strongly
+        does Berkson's bias effect the accuracy of the diseases comorbidities
         predictions?
 
     (3) Can the effect of Berkson's bias be reduced by normalizing the EMR
