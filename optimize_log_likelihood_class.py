@@ -69,8 +69,12 @@ class OptimizeLogLikelihood(object):
 
         self.opt_method = "BFGS"
         self.use_analytical_gradient = False
-        self.rng = np.random.RandomState(50)  # fixed seed
         self.verbose = verbose
+
+        self.tau1 = None
+        self.tau2 = None
+        self.overlap_type = None
+        self.rng = np.random.RandomState(50)  # fixed seed
 
         self.log_likelihood_func = None
         self.log_likelihood_fprime = None

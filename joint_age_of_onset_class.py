@@ -297,6 +297,11 @@ class JointAgeOfOnset(object):
 
         total_counts = np.sum(age_of_onset_counts)
 
+        # Make sure total_counts is not zero. This can happen in cases where
+        # there is zero patient of specific sex with disease. For example, male
+        # patient with female breast cancer.
+        if total_counts == 0: total_counts = 1
+
         # Convert to a cumulative count.
         age_of_onset_cum_counts = np.cumsum(age_of_onset_counts)
 

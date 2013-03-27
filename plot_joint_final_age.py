@@ -121,6 +121,10 @@ def __plot_figure(final_age_array, patient_counts, D1, D2, normalize, verbose):
 
     if normalize:
         for index, sum_count in enumerate(sum_counts):
+
+            # Make sure sum_count is not zero.
+            if sum_count == 0: sum_count = 1
+
             patient_counts[index] = patient_counts[index] / sum_count
 
     plt.clf()  # clear the current figure.
@@ -135,7 +139,7 @@ def __plot_figure(final_age_array, patient_counts, D1, D2, normalize, verbose):
     y_max = 1.4* max(np.max(patient_counts[0]), np.max(patient_counts[1]),
                      np.max(patient_counts[2]), np.max(patient_counts[3]))
 
-    plt.xlim([0.00, 100.00])
+    plt.xlim([0.00, 101.00])
     plt.ylim([0.00, y_max])
     plt.xlabel('Patient\'s Final Age', fontsize='large')
 

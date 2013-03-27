@@ -367,7 +367,7 @@ class EMRDatabase(object):
           (2) Patient's gender.
           (3) Patient's race/ethnicity.
           (4) ICD-9 code of disease.
-          (5) Visit-Age (more strictly, the age of first appearance)
+          (5) Visit-Age (or more strictly, the age of first appearance)
           (6) Comments  (this line will be ignored)
 
         Will assume that the Patient's current age and visit age is
@@ -419,7 +419,11 @@ class EMRDatabase(object):
             gender = self.__parse_gender(cols[2])
             ethnicity = self.__parse_ethnicity(cols[3])
             ICD_9 = cols[4]
-            visit_age = int(cols[5])
+
+            try:
+                visit_age = int(cols[5])
+            except:
+                print "line: " , line
 
             # In rare cases the recorded visit age is greater than current_age. 
             # For example, patient #16161723 has an recorded visit_age of 90
@@ -703,8 +707,9 @@ class EMRDatabase(object):
         print "From %s:" % emr_data_file
         print "(1) Imported %d total entries" % stat['total_entries'],
         print "of which %d entries were ignored." % stat['ignored_entries']
-        print "(2) Imported %d unique patients" % stat['patient_count']
-        print "(3) Imported %d unique diseases" % stat['disease_count']
+        print "(2) Imported %d unique patients." % stat['patient_count']
+        print "(3) Imported %d unique disease instances." % (
+              stat['disease_count'])
         print
 
     def __combine_EMR_data(self, in_EMR_data_list):

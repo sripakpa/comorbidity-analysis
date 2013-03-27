@@ -1,0 +1,20 @@
+# emr_data_file = data/test_EMR_dataset.csv
+# norm_prval_method = Rzhetsky
+# threshold_type = sharp
+
+# D1, D2, overlap_type, overlap_LL, indepedent_LL, LLR, p_value
+Alzheimer's disease, Attention deficit, cooperation, -5.861E+03, -5.861E+03, -1.490E-04, 1.000E+00
+Alzheimer's disease, Autism, cooperation, -4.042E+03, -4.042E+03, -7.314E-05, 1.000E+00
+Alzheimer's disease, Breast cancer (female), cooperation, -6.582E+03, -6.582E+03, -2.674E-05, 1.000E+00
+Alzheimer's disease, Epilepsy, cooperation, -9.615E+03, -9.615E+03, -9.195E-04, 1.000E+00
+Alzheimer's disease, Schizophrenia, cooperation, -3.809E+03, -3.809E+03, -4.842E-04, 1.000E+00
+Attention deficit, Autism, cooperation, -6.298E+03, -6.343E+03, 9.026E+01, 0.000E+00
+Attention deficit, Breast cancer (female), cooperation, -9.962E+03, -9.962E+03, -1.612E-04, 1.000E+00
+Attention deficit, Epilepsy, cooperation, -1.219E+04, -1.223E+04, 6.594E+01, 4.441E-16
+Attention deficit, Schizophrenia, cooperation, -6.198E+03, -6.203E+03, 1.090E+01, 9.635E-04
+Autism, Breast cancer (female), cooperation, -8.093E+03, -8.093E+03, -2.191E-06, 1.000E+00
+Autism, Epilepsy, cooperation, -1.021E+04, -1.032E+04, 2.114E+02, 0.000E+00
+Autism, Schizophrenia, cooperation, -4.401E+03, -4.401E+03, 6.000E-01, 4.386E-01
+Breast cancer (female), Epilepsy, cooperation, -1.371E+04, -1.371E+04, -9.404E-04, 1.000E+00
+Breast cancer (female), Schizophrenia, cooperation, -7.723E+03, -7.723E+03, -1.532E-04, 1.000E+00
+Epilepsy, Schizophrenia, cooperation, -1.010E+04, -1.011E+04, 2.592E+01, 3.558E-07

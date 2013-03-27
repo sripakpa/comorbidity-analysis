@@ -50,8 +50,7 @@ EXAMPLES
         --d1 "Breast cancer (female)" --d2 "Schizophrenia"
 
     # Plot for all disease pairs with non-zero patient counts.
-    python plot_joint_age_of_onset.py \
-        -i data/test_EMR_dataset.csv
+    python plot_joint_age_of_onset.py -i data/test_EMR_dataset.csv
 
 AUTHOR
     Parin Sripakdeevong <sripakpa@stanford.edu>"""

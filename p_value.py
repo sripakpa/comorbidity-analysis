@@ -128,7 +128,11 @@ def main():
     opt_log_likelihood.set_use_random_seed(options.use_random_seed)
 
     f = open("p_value.txt", 'w')
-    f.write("D1, D2, overlap_type, ")
+    f.write("# emr_data_file = %s\n" % options.emr_data_file)
+    f.write("# norm_prval_method = %s\n" % options.norm_prval_method)
+    f.write("# threshold_type = %s\n" % options.threshold_type)
+    f.write("\n")
+    f.write("# D1, D2, overlap_type, ")
     f.write("overlap_LL, indepedent_LL, ")
     f.write("LLR, p_value\n")
 
@@ -192,7 +196,7 @@ def main():
             # distribution
             p_value = 1.0 - chi2.cdf(log_likelihood_ratio, dof)
 
-            text = "%s, %s, %s," % (D1, D2, options.overlap_type)
+            text = "%s, %s, %s, " % (D1, D2, options.overlap_type)
             text += "%.3E, " % overlap_log_likelihood
             text += "%.3E, " % indep_log_likelihood
             text += "%.3E, %.3E" % (log_likelihood_ratio, p_value)
@@ -374,9 +378,6 @@ if __name__ == '__main__':
         print "overlap_type: %s" % options.overlap_type
         print "threshold_type: %s" % options.threshold_type
         print
-        print "Plotting parameters:"
-        print "--------------------"
-        print "use_random_seed: %s" % options.use_random_seed
         print "-" * 50
 
     main()
