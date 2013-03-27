@@ -1,6 +1,6 @@
 INTRODUCTION:
 
-    The python package contains scripts for data mining of the Electronic
+    This python package contains scripts for data mining of the Electronic
     Medical Records (EMR) to predict predict diseases genetic overlaps and 
     comorbidities.
     
